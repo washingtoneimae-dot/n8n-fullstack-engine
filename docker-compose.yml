@@ -16,21 +16,26 @@ services:
       - WEBHOOK_URL=http://localhost:5678
     restart: unless-stopped
 
-  # ── App Runtime (Phase 2+) ──────────────────────────────
-  # runtime-dev:
-  #   build: ./docker/runtime
-  #   container_name: n8n-fullstack-runtime
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./packages/runtime:/app
-  #     - /app/node_modules
-  #   depends_on:
-  #     - n8n-dev
-  #   environment:
-  #     - N8N_URL=http://n8n-dev:5678
-  #     - PORT=3000
-  #     - NODE_ENV=development
+  # ── App Runtime (Phase 2) ──────────────────────────────
+  runtime-dev:
+    build:
+      context: ./packages/runtime
+      dockerfile: ../../docker/runtime/Dockerfile
+    container_name: n8n-fullstack-runtime
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./packages/runtime/src:/app/src
+      - ./packages/runtime/routes.json:/app/routes.json
+      - ./packages/runtime/public:/app/public
+    depends_on:
+      - n8n-dev
+    environment:
+      - N8N_URL=http://n8n-dev:5678
+      - PORT=3000
+      - NODE_ENV=development
+      - ROUTES_FILE=/app/routes.json
+      - PUBLIC_DIR=/app/public
 
 volumes:
   n8n_data:

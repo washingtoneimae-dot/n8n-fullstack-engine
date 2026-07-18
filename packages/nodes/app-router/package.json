@@ -1,0 +1,25 @@
+{
+  "name": "@n8n-fullstack/app-router",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Custom n8n node that provides multi-page routing for web applications",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "n8n-workflow": "^1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5",
+    "@types/node": "^20"
+  },
+  "n8n": {
+    "credentials": [],
+    "nodes": [
+      "dist/AppRouterNode.node.js"
+    ]
+  }
+}

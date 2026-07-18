@@ -1,0 +1,24 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "webhookUrl": "http://n8n-dev:5678/webhook/todo-app",
+      "method": "GET"
+    },
+    {
+      "path": "/todos",
+      "webhookUrl": "http://n8n-dev:5678/webhook/todo-app",
+      "method": "GET"
+    },
+    {
+      "path": "/todos/new",
+      "webhookUrl": "http://n8n-dev:5678/webhook/todo-app",
+      "method": "GET"
+    },
+    {
+      "path": "/api/todos",
+      "webhookUrl": "http://n8n-dev:5678/webhook/todo-app",
+      "method": "POST"
+    }
+  ]
+}
