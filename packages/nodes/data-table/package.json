@@ -1,0 +1,25 @@
+{
+  "name": "@n8n-fullstack/data-table",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Custom n8n node that provides persistent CRUD storage using SQLite",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "n8n-workflow": "^1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5",
+    "@types/node": "^20"
+  },
+  "n8n": {
+    "credentials": [],
+    "nodes": [
+      "dist/DataTableNode.node.js"
+    ]
+  }
+}
