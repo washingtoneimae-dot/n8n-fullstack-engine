@@ -1,0 +1,26 @@
+{
+  "name": "n8n-fullstack-engine",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Turn n8n workflows into standalone fullstack apps — visually, by beginners.",
+  "workspaces": [
+    "packages/nodes/*",
+    "packages/runtime",
+    "packages/deploy",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev": "docker compose up",
+    "dev:build": "docker compose build",
+    "dev:down": "docker compose down",
+    "clean": "docker compose down -v",
+    "lint": "eslint packages/*/src",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "typescript": "^5.5",
+    "jest": "^29",
+    "ts-jest": "^29",
+    "@types/node": "^20"
+  }
+}

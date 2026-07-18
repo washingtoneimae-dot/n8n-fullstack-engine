@@ -1,0 +1,17 @@
+{
+  "name": "@n8n-fullstack/shared",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shared types, schemas, and utilities for n8n Fullstack Engine",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5",
+    "@types/node": "^20"
+  }
+}
