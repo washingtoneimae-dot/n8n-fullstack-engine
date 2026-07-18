@@ -1,0 +1,61 @@
+ HARDNESS RATING: 8/10
+
+    Here's the breakdown:
+
+    Aspect: Custom node class (TypeScript)
+    Difficulty: 3/10
+    Reasoning: n8n's node API is well-documented. A node that receives input and returns transformed data is very straightforward
+    ────────────────────────────────────────
+    Aspect: Generating HTML from a node
+    Difficulty: 4/10
+    Reasoning: Template strings, compile JSX, or integrate with an HTML templating library
+    ────────────────────────────────────────
+    Aspect: n8n Data Table for persistent storage
+    Difficulty: 3/10
+    Reasoning: n8n already has a Data Table node. Using it from a custom node is just API calls
+    ────────────────────────────────────────
+    Aspect: Auth / sessions / JWT
+    Difficulty: 5/10
+    Reasoning: Running web server auth inside n8n's workflow engine isn't what it's built for. Have to interact with the HTTP lifecycle, cookies,
+      request/response objects at n8n's periphery
+    ────────────────────────────────────────
+    Aspect: Page rendering with sub-node assembly
+    Difficulty: 7/10
+    Reasoning: n8n's Cluster Node system (root + sub-nodes) is there, but dynamically composing UI components at runtime from node definitions is not its design
+      purpose. The Page node would need to inspect its own sub-nodes, execute them, and collect their output — all at runtime
+    ────────────────────────────────────────
+    Aspect: Multi-page routing (App Router)
+    Difficulty: 7/10
+    Reasoning: n8n executes workflows in isolation. Coordinating across workflows (route → auth → page → components) means building a custom runner on top of the
+      n8n engine
+    ────────────────────────────────────────
+    Aspect: Deploy node / packaging
+    Difficulty: 6/10
+    Reasoning: Dockerizing an n8n instance with a baked config is easy. Dockerizing it so it starts up automatically and serves at a single endpoint is
+      moderately challenging
+    ────────────────────────────────────────
+    Aspect: Frontend SPA rendering
+    Difficulty: 8/10
+    Reasoning: n8n produces JSON from nodes. Turning that into an interactive single-page app (with routing, state updates, partial page refreshes) without
+      shipping a React/Next.js codebase is the big one. This is where the project has to decide: interpret nodes as a frontend or compile from node definitions
+      into a separate frontend framework
+    ────────────────────────────────────────
+    Aspect: Overall integration
+    Difficulty: 8.5/10
+    Reasoning: Making all these pieces work together WITHOUT node.js framework code, all within n8n's model/run/complete execution cycle
+    ────────────────────────────────────────
+    Aspect: Making it feel production-grade**
+    Difficulty: 9/10
+    Reasoning: Fast load times, error states, loading indicators, responsive design, accessibility, browser history, mobile support. polish is a beast on a
+      platform that wasn't meant to do this
+
+    P80 estimate: 2-3 months solo
+
+    - 2 weeks: functional custom node that renders HTML
+    - 1 month: basic Page node with sub-node assembly
+    - 2 months: Auth + Data Table CRUD
+    - 3 months: App Router with multi-page navigation + a minimal end-to-end Todo app
+    - Remaining: Deploy node, SSG/SSR split, polish, edge cases
+
+    Counterfactual: building the same thing in Python with FastAPI directly would be simpler and actually faster to develop, BUT you lose the visual
+    drag-drop UI and the 400+ n8n integrations. The hardness lives in the constraint: all inside n8n.
