@@ -2,7 +2,7 @@
   "name": "Todo App Demo",
   "nodes": [
     {
-      "id": "node-webhook-001",
+      "id": "wh-001",
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
@@ -16,30 +16,149 @@
       }
     },
     {
-      "id": "node-page-001",
-      "name": "Render Page",
-      "type": "CUSTOM.pageNode",
+      "id": "rt-001",
+      "name": "App Router",
+      "type": "CUSTOM.appRouterNode",
       "typeVersion": 1,
       "position": [250, 300],
       "parameters": {
+        "routes": {
+          "route": [
+            { "path": "/", "pageTitle": "Home", "layout": "default", "authRequired": false },
+            { "path": "/todos", "pageTitle": "Todo List", "layout": "default", "authRequired": false },
+            { "path": "/todos/new", "pageTitle": "New Todo", "layout": "default", "authRequired": false },
+            { "path": "/api/todos", "pageTitle": "Create Todo", "layout": "default", "authRequired": false }
+          ]
+        },
+        "defaultRoute": "/"
+      }
+    },
+    {
+      "id": "db-001",
+      "name": "Create Table",
+      "type": "CUSTOM.dataTableNode",
+      "typeVersion": 1,
+      "position": [500, 100],
+      "parameters": {
+        "operation": "createTable",
+        "tableName": "todos",
+        "columns": {
+          "column": [
+            { "name": "id", "type": "INTEGER PRIMARY KEY", "required": false },
+            { "name": "title", "type": "TEXT", "required": true },
+            { "name": "description", "type": "TEXT", "required": false },
+            { "name": "completed", "type": "INTEGER", "required": false }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pg-001",
+      "name": "Render Home",
+      "type": "CUSTOM.pageNode",
+      "typeVersion": 1,
+      "position": [750, 100],
+      "parameters": {
         "pageTitle": "Todo App",
+        "layout": "default",
+        "showNav": true
+      }
+    },
+    {
+      "id": "db-002",
+      "name": "Fetch Todos",
+      "type": "CUSTOM.dataTableNode",
+      "typeVersion": 1,
+      "position": [500, 250],
+      "parameters": {
+        "operation": "select",
+        "tableName": "todos",
+        "whereClause": ""
+      }
+    },
+    {
+      "id": "pg-002",
+      "name": "Render Todos",
+      "type": "CUSTOM.pageNode",
+      "typeVersion": 1,
+      "position": [750, 250],
+      "parameters": {
+        "pageTitle": "Todo List",
+        "layout": "default",
+        "showNav": true
+      }
+    },
+    {
+      "id": "fm-001",
+      "name": "Add Todo Form",
+      "type": "CUSTOM.formNode",
+      "typeVersion": 1,
+      "position": [500, 400],
+      "parameters": {
+        "formFields": {
+          "fields": [
+            { "label": "Title", "name": "title", "type": "text", "required": true, "placeholder": "What needs to be done?" },
+            { "label": "Description", "name": "description", "type": "textarea", "required": false, "placeholder": "Optional description" }
+          ]
+        },
+        "submitText": "Add Todo",
+        "successMessage": "Todo added!",
+        "formAction": ""
+      }
+    },
+    {
+      "id": "db-003",
+      "name": "Insert Todo",
+      "type": "CUSTOM.dataTableNode",
+      "typeVersion": 1,
+      "position": [500, 520],
+      "parameters": {
+        "operation": "insert",
+        "tableName": "todos",
+        "data": ""
+      }
+    },
+    {
+      "id": "db-004",
+      "name": "Fetch After Insert",
+      "type": "CUSTOM.dataTableNode",
+      "typeVersion": 1,
+      "position": [750, 520],
+      "parameters": {
+        "operation": "select",
+        "tableName": "todos",
+        "whereClause": ""
+      }
+    },
+    {
+      "id": "pg-003",
+      "name": "Render Success",
+      "type": "CUSTOM.pageNode",
+      "typeVersion": 1,
+      "position": [1000, 520],
+      "parameters": {
+        "pageTitle": "Todo Created",
         "layout": "default",
         "showNav": true
       }
     }
   ],
   "connections": {
-    "Webhook": {
+    "Webhook": { "main": [ [ { "node": "App Router", "type": "main", "index": 0 } ] ] },
+    "App Router": {
       "main": [
-        [
-          { "node": "Render Page", "type": "main", "index": 0 }
-        ]
+        [ { "node": "Create Table", "type": "main", "index": 0 } ],
+        [ { "node": "Fetch Todos", "type": "main", "index": 0 } ],
+        [ { "node": "Add Todo Form", "type": "main", "index": 0 } ],
+        [ { "node": "Insert Todo", "type": "main", "index": 0 } ]
       ]
-    }
+    },
+    "Create Table": { "main": [ [ { "node": "Render Home", "type": "main", "index": 0 } ] ] },
+    "Fetch Todos": { "main": [ [ { "node": "Render Todos", "type": "main", "index": 0 } ] ] },
+    "Insert Todo": { "main": [ [ { "node": "Fetch After Insert", "type": "main", "index": 0 } ] ] },
+    "Fetch After Insert": { "main": [ [ { "node": "Render Success", "type": "main", "index": 0 } ] ] }
   },
-  "settings": {
-    "executionOrder": "v1"
-  },
+  "settings": { "executionOrder": "v1" },
   "staticData": null,
   "tags": []
 }

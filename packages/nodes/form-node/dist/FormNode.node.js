@@ -187,12 +187,15 @@ class FormNode {
 }
 exports.FormNode = FormNode;
 function isFormRenderRequest(data) {
+    // Has route key = App Router routed output = render form
+    if ('route' in data && typeof data.route === 'object')
+        return true;
     // Empty input or input with 'html' property means we should render a form
     if (Object.keys(data).length === 0)
         return true;
-    if ('html' in data)
+    if ('html' in data && typeof data.html === 'string')
         return true;
-    // Otherwise, it's submitted form data — don't render
+    // Any other data means it's a submission
     return false;
 }
 function buildFormHtml(fields, submitText, successMessage, formAction, csrfToken) {

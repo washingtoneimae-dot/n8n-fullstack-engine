@@ -127,6 +127,19 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
 }
+function formatValue(val) {
+    if (val === null || val === undefined)
+        return '';
+    if (typeof val === 'object') {
+        try {
+            return JSON.stringify(val);
+        }
+        catch {
+            return String(val);
+        }
+    }
+    return String(val);
+}
 function renderData(data) {
     if (!data || Object.keys(data).length === 0) {
         return '<p class="text-gray-500">No data</p>';
@@ -168,7 +181,7 @@ function renderData(data) {
               ${entries.map(([key, val], idx) => `
                 <tr class="${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
                   <td class="px-6 py-3 text-sm font-medium text-gray-700 w-1/3">${escapeHtml(key)}</td>
-                  <td class="px-6 py-3 text-sm text-gray-900">${escapeHtml(String(val))}</td>
+                  <td class="px-6 py-3 text-sm text-gray-900">${escapeHtml(formatValue(val))}</td>
                 </tr>
               `).join('')}
             </tbody>

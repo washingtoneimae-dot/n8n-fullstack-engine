@@ -29,7 +29,12 @@ export class AppRouterNode implements INodeType {
       name: 'App Router',
     },
     inputs: ['main'],
-    outputs: ['main'],
+    outputs: [
+      { type: 'main' as const, displayName: 'Home' },
+      { type: 'main' as const, displayName: 'Todos' },
+      { type: 'main' as const, displayName: 'New Todo' },
+      { type: 'main' as const, displayName: 'Create API' },
+    ],
     properties: [
       {
         displayName: 'Routes',
@@ -105,7 +110,9 @@ export class AppRouterNode implements INodeType {
       const inputData = items[i].json;
 
       // On first execution (no request input): output route definitions for setup
-      if (!inputData || Object.keys(inputData).length === 0 || !('path' in inputData)) {
+      const hasRequest = 'path' in inputData && typeof inputData.path === 'string';
+      const hasWrappedRequest = inputData.body && typeof inputData.body === 'object' && 'path' in inputData.body;
+      if (!hasRequest && !hasWrappedRequest) {
         returnData.push({
           json: {
             routes: routes.map((r) => ({
@@ -121,48 +128,51 @@ export class AppRouterNode implements INodeType {
       }
 
       // With request input: match the request path against defined routes
-      const requestPath = inputData.path as string;
+      // Handle both direct input and n8n webhook-wrapped input (body.path)
+      const bodyField = inputData.body;
+      const wrappedBody = (bodyField && typeof bodyField === 'object' && !Array.isArray(bodyField) ? bodyField : {}) as Record<string, unknown>;
+      const requestPath = (typeof inputData.path === 'string' ? inputData.path : (wrappedBody.path as string)) || '/';
+      const method = (typeof inputData.method === 'string' ? inputData.method : (wrappedBody.method as string)) || 'GET';
+      const query = inputData.query && typeof inputData.query === 'object' ? inputData.query : (wrappedBody.query || {});
+      const body = bodyField && typeof bodyField === 'object' ? bodyField : {};
+      const headers = inputData.headers && typeof inputData.headers === 'object' ? inputData.headers : (wrappedBody.headers || {});
+      const session = inputData.session || null;
       const parsedRoutes = routes.map(parseRoute);
       const match = matchRoute(requestPath, parsedRoutes);
-
-      if (match) {
-        returnData.push({
-          json: {
-            route: match.definition,
-            params: match.params,
-            context: {
-              path: requestPath,
-              method: inputData.method,
-              query: inputData.query,
-              body: inputData.body,
-              headers: inputData.headers,
-              session: inputData.session,
-            },
-            matchedPath: requestPath,
-          },
-        });
-      } else {
-        const defaultDef = routes.find((r) => r.path === defaultRoute);
-        returnData.push({
-          json: {
-            route: defaultDef || { path: defaultRoute, pageTitle: 'Default', layout: 'default', authRequired: false },
-            params: {},
-            context: {
-              path: requestPath,
-              method: inputData.method,
-              query: inputData.query,
-              body: inputData.body,
-              headers: inputData.headers,
-              session: inputData.session,
-            },
-            matchedPath: requestPath,
-            note: `No route matched "${requestPath}", using default "${defaultRoute}"`,
-          },
-        });
-      }
+      const out = {
+        route: match ? match.definition : (routes.find((r) => r.path === defaultRoute) || { path: defaultRoute, pageTitle: 'Default', layout: 'default', authRequired: false }),
+        params: match ? match.params : {},
+        context: {
+          path: requestPath,
+          method: method,
+          query: query,
+          body: body,
+          headers: headers,
+          session: session,
+        },
+        matchedPath: requestPath,
+      };
+      returnData.push({ json: out });
     }
 
-    return [returnData];
+    // Route the output to the correct output channel based on matched route path
+    const matchedPath = returnData[0]?.json?.matchedPath || '/';
+    const home: INodeExecutionData[] = [];
+    const todos: INodeExecutionData[] = [];
+    const newTodo: INodeExecutionData[] = [];
+    const apiTodos: INodeExecutionData[] = [];
+
+    if (matchedPath === '/') {
+      return [returnData, [], [], []];
+    } else if (matchedPath === '/todos') {
+      return [[], returnData, [], []];
+    } else if (matchedPath === '/todos/new') {
+      return [[], [], returnData, []];
+    } else if (matchedPath === '/api/todos') {
+      return [[], [], [], returnData];
+    }
+    // Default: send to home output
+    return [returnData, [], [], []];
   }
 }
 

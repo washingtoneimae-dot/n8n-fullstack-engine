@@ -12,7 +12,6 @@ const PUBLIC_DIR = process.env.PUBLIC_DIR || path.join(process.cwd(), 'public');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(PUBLIC_DIR));
 
 // Health check
 app.get('/health', (_req, res) => {
@@ -110,6 +109,9 @@ app.all('*', async (req, res) => {
     res.status(502).json({ error: 'Failed to reach n8n workflow', path: req.path });
   }
 });
+
+// Serve static files last (fallback for non-routed paths)
+app.use(express.static(PUBLIC_DIR));
 
 app.listen(Number(PORT), () => {
   console.log(`[runtime] n8n Fullstack Engine running on port ${PORT}`);

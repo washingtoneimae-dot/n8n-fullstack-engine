@@ -208,7 +208,40 @@ function handleInsert(db, ctx, itemIndex, items, tableName) {
         }
     }
     else {
-        records = items.map((item) => item.json);
+        // If there are items, try to extract meaningful data from them
+        records = [];
+        for (const item of items) {
+            const json = item.json;
+            // Support App Router output: extract data from context.body
+            if (json.route && json.params && json.context) {
+                const context = json.context;
+                let extractedBody = context.body;
+                // If the body has nested body (webhook wraps {path, method, body: {actual}}),
+                // extract the innermost body
+                if (extractedBody && typeof extractedBody === 'object' && 'body' in extractedBody) {
+                    const innerBody = extractedBody.body;
+                    if (innerBody && typeof innerBody === 'object' && !Array.isArray(innerBody)) {
+                        extractedBody = innerBody;
+                    }
+                }
+                if (extractedBody && typeof extractedBody === 'object' && !Array.isArray(extractedBody) && Object.keys(extractedBody).length > 0) {
+                    // Skip route/metadata fields
+                    const { path, method, ...cleanBody } = extractedBody;
+                    if (Object.keys(cleanBody).length > 0) {
+                        records.push(cleanBody);
+                    }
+                    else {
+                        records.push(json);
+                    }
+                }
+                else {
+                    records.push(json);
+                }
+            }
+            else {
+                records.push(json);
+            }
+        }
     }
     if (records.length === 0) {
         return [{ json: { success: true, operation: 'insert', table: tableName, inserted: 0 } }];

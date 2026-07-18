@@ -233,7 +233,37 @@ function handleInsert(
       throw new Error(`Invalid JSON in Data field: ${rawData}`);
     }
   } else {
-    records = items.map((item) => item.json);
+    // If there are items, try to extract meaningful data from them
+    records = [];
+    for (const item of items) {
+      const json = item.json as Record<string, unknown>;
+      // Support App Router output: extract data from context.body
+      if (json.route && json.params && json.context) {
+        const context = json.context as Record<string, unknown>;
+        let extractedBody = context.body as Record<string, unknown> | undefined;
+        // If the body has nested body (webhook wraps {path, method, body: {actual}}),
+        // extract the innermost body
+        if (extractedBody && typeof extractedBody === 'object' && 'body' in extractedBody) {
+          const innerBody = extractedBody.body;
+          if (innerBody && typeof innerBody === 'object' && !Array.isArray(innerBody)) {
+            extractedBody = innerBody as Record<string, unknown>;
+          }
+        }
+        if (extractedBody && typeof extractedBody === 'object' && !Array.isArray(extractedBody) && Object.keys(extractedBody).length > 0) {
+          // Skip route/metadata fields
+          const { path, method, ...cleanBody } = extractedBody;
+          if (Object.keys(cleanBody).length > 0) {
+            records.push(cleanBody);
+          } else {
+            records.push(json);
+          }
+        } else {
+          records.push(json);
+        }
+      } else {
+        records.push(json as Record<string, unknown>);
+      }
+    }
   }
 
   if (records.length === 0) {

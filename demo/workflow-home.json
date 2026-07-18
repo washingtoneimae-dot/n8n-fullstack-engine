@@ -1,0 +1,61 @@
+{
+  "name": "Todo App - Home",
+  "nodes": [
+    {
+      "id": "wh-001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [0, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "todo-home",
+        "responseMode": "lastNode",
+        "responseData": "all",
+        "options": {}
+      }
+    },
+    {
+      "id": "db-001",
+      "name": "Create Table",
+      "type": "CUSTOM.dataTableNode",
+      "typeVersion": 1,
+      "position": [250, 200],
+      "parameters": {
+        "operation": "createTable",
+        "tableName": "todos",
+        "columns": {
+          "column": [
+            { "name": "id", "type": "INTEGER", "required": true },
+            { "name": "title", "type": "TEXT", "required": true },
+            { "name": "description", "type": "TEXT", "required": false },
+            { "name": "completed", "type": "INTEGER", "required": false }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pg-001",
+      "name": "Render Home",
+      "type": "CUSTOM.pageNode",
+      "typeVersion": 1,
+      "position": [500, 200],
+      "parameters": {
+        "pageTitle": "Todo App",
+        "layout": "default",
+        "showNav": true
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [ [ { "node": "Create Table", "type": "main", "index": 0 } ] ]
+    },
+    "Create Table": {
+      "main": [ [ { "node": "Render Home", "type": "main", "index": 0 } ] ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": []
+}
