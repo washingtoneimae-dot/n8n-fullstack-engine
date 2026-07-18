@@ -3,22 +3,22 @@
     {
       "path": "/",
       "webhookUrl": "http://n8n-dev:5678/webhook/todo-app",
-      "method": "GET"
+      "method": "ALL"
     },
     {
       "path": "/todos",
       "webhookUrl": "http://n8n-dev:5678/webhook/todo-app",
-      "method": "GET"
+      "method": "ALL"
     },
     {
       "path": "/todos/new",
       "webhookUrl": "http://n8n-dev:5678/webhook/todo-app",
-      "method": "GET"
+      "method": "ALL"
     },
     {
       "path": "/api/todos",
       "webhookUrl": "http://n8n-dev:5678/webhook/todo-app",
-      "method": "POST"
+      "method": "ALL"
     }
   ]
 }

@@ -57,13 +57,8 @@ function matchRouteConfig(routes: RouteConfig[], reqPath: string, method: string
 }
 
 app.all('*', async (req, res) => {
-  if (req.path.startsWith('/health') || req.path.startsWith('/api/status')) {
-    return;
-  }
-
-  if (req.path === '/') {
-    return;
-  }
+  // Health endpoint has dedicated handler above; everything
+  // else (including /) is matched against route config
 
   const routes = loadRoutes();
   const routeConfig = matchRouteConfig(routes, req.path, req.method);
@@ -96,7 +91,10 @@ app.all('*', async (req, res) => {
     if (contentType.includes('application/json')) {
       try {
         const json = JSON.parse(text);
-        if (json.html) {
+        // Handle array response [{"html":"...","title":"...",...}]
+        if (Array.isArray(json) && json.length > 0 && json[0].html) {
+          res.send(json[0].html);
+        } else if (json.html) {
           res.send(json.html);
         } else {
           res.json(json);
