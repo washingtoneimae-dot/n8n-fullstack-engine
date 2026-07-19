@@ -1,0 +1,6 @@
+{
+  "/test": {
+    "webhook": "test-page",
+    "title": "Gateway test page"
+  }
+}
